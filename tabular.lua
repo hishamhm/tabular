@@ -23,7 +23,7 @@ local draw = {
 local colors = {}
 
 local function strlen(s)
-   s = s:gsub("\27[^m]*m", "")
+   s = tostring(s):gsub("\27[^m]*m", "")
    return #s
 end
 
@@ -164,6 +164,7 @@ show_as_columns = function(t, bgcolor, seen, column_order, skip_header)
       if type(row) == "table" then
          for k, v in pairs(row) do
             if not column_set or column_set[k] then
+               k = tostring(k)
                if not columns[k] then
                   columns[k] = {}
                   columns[k].width = strlen(k)
@@ -182,6 +183,7 @@ show_as_columns = function(t, bgcolor, seen, column_order, skip_header)
       column_set = {}
       for name, row in pairs(columns) do
          if not column_set[name] then
+            name = tostring(name)
             table.insert(column_names, name)
             column_set[name] = true
          end
