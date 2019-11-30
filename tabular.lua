@@ -233,7 +233,8 @@ show_as_columns = function(t, bgcolor, seen, column_order, skip_header)
       for h = 1, row_heights[i] or 1 do
          local line = { [1] = draw.V, }
          for _, cname in ipairs(column_names) do
-            output_cell(line, cname, columns[cname][i][h], bgcolor and colors[i % #colors + 1])
+            local row = columns[cname][i]
+            output_cell(line, cname, row and row[h] or "", bgcolor and colors[i % #colors + 1])
          end
          output_line(out, table.concat(line))
       end

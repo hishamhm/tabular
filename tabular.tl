@@ -233,7 +233,8 @@ show_as_columns = function(t: {{string:any}}, bgcolor: string, seen: {any:boolea
     for h = 1, row_heights[i] or 1 do
       local line = { draw.V }
       for _, cname in ipairs(column_names) do
-        output_cell(line, cname, columns[cname][i][h], bgcolor and colors[(i % #colors) + 1])
+        local row = columns[cname][i]
+        output_cell(line, cname, row and row[h] or "", bgcolor and colors[(i % #colors) + 1])
       end
       output_line(out, table.concat(line))
     end
