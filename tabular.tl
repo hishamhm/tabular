@@ -85,16 +85,18 @@ local function escape_chars(c:string):string
    return "\\" .. string.byte(c)
 end
 
-local function show_as_list(t: any, color: string, seen: {any:boolean}): Output
+local function show_as_list(t: any, color: string, seen: {any:boolean}, skip_array: boolean): Output
   local t = t as table
   local tt: {Pair} = {}
   local width = 0
   local keys = {}
 
   for k, v in pairs(t) do
-    table.insert(tt, { v1 = k as string, v2 = v })
-    keys[k] = tostring(k)
-    width = math.max(width, strlen(keys[k]))
+    if not skip_array or type(k) ~= "number" then
+      table.insert(tt, { v1 = k as string, v2 = v })
+      keys[k] = tostring(k)
+      width = math.max(width, strlen(keys[k]))
+    end
   end
 
   table.sort(tt, function(a: Pair, b: Pair): boolean
@@ -240,6 +242,17 @@ show_as_columns = function(t: {{string:any}}, bgcolor: string, seen: {any:boolea
     end
   end
   output_line(out, table.concat(border_bot))
+
+  for k, v in pairs(t as {any:any}) do
+    if type(k) ~= "number" then
+      local out2 = show_as_list(t, bgcolor, seen, true)
+      for _, line in ipairs(out2) do
+        output_line(out, line)
+      end
+      break
+    end
+  end
+
   return out
 end
 

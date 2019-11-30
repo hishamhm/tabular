@@ -85,16 +85,18 @@ local function escape_chars(c)
    return "\\" .. string.byte(c)
 end
 
-local function show_as_list(t, color, seen)
+local function show_as_list(t, color, seen, skip_array)
    local t = t
    local tt = {}
    local width = 0
    local keys = {}
 
    for k, v in pairs(t) do
-      table.insert(tt, { ["v1"] = k, ["v2"] = v, })
-      keys[k] = tostring(k)
-      width = math.max(width, strlen(keys[k]))
+      if not skip_array or type(k) ~= "number" then
+         table.insert(tt, { ["v1"] = k, ["v2"] = v, })
+         keys[k] = tostring(k)
+         width = math.max(width, strlen(keys[k]))
+      end
    end
 
    table.sort(tt, function(a, b)
@@ -240,6 +242,17 @@ show_as_columns = function(t, bgcolor, seen, column_order, skip_header)
       end
    end
    output_line(out, table.concat(border_bot))
+
+   for k, v in pairs(t) do
+      if type(k) ~= "number" then
+         local out2 = show_as_list(t, bgcolor, seen, true)
+         for _, line in ipairs(out2) do
+            output_line(out, line)
+         end
+         break
+      end
+   end
+
    return out
 end
 
