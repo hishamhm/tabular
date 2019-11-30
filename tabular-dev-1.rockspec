@@ -1,10 +1,15 @@
 package = "tabular"
 version = "dev-1"
 source = {
-   url = "git+https://github.com/hishamhm/tl.git"
+   url = "git+https://github.com/hishamhm/tabular.git"
 }
 description = {
-   homepage = "https://github.com/hishamhm/tl",
+   summary = "yet another library for visualizing Lua tables",
+   detailed = [[
+      This module is especially useful for visualizing arrays of tables,
+      displaying keys as columns in tabular fashion.
+   ]],
+   homepage = "https://github.com/hishamhm/tabular",
    license = "MIT"
 }
 dependencies = {
