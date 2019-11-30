@@ -13,6 +13,8 @@ description = {
    license = "MIT"
 }
 dependencies = {
+   "lua >= 5.1",
+   "compat53",
    "ansicolors ~> 1.0",
 }
 build = {

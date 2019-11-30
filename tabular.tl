@@ -68,8 +68,8 @@ local Output = record
    width: number
 end
 
-local show: function(any, string, {any:boolean}):Output
-local show_as_columns: function({{string:any}}, string, {any:boolean}, boolean): Output
+local show: function(any, string, {any:boolean}, {string}):Output
+local show_as_columns: function({{string:any}}, string, {any:boolean}, {string}, boolean): Output
 
 local function output_line(out: Output, line: string)
   table.insert(out, line)

@@ -1,4 +1,4 @@
-local tabular = {}
+local utf8 = utf8 or require('compat53.module').utf8; local tabular = {}
 
 local AnsiColors = {}
 
