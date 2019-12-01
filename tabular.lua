@@ -86,7 +86,6 @@ local function escape_chars(c)
 end
 
 local function show_as_list(t, color, seen, skip_array)
-   local t = t
    local tt = {}
    local width = 0
    local keys = {}
@@ -163,6 +162,7 @@ show_as_columns = function(t, bgcolor, seen, column_order, skip_header)
    for i, row in ipairs(t) do
       if type(row) == "table" then
          for k, v in pairs(row) do
+            local k = tostring(k)
             if not column_set or column_set[k] then
                if not columns[k] then
                   columns[k] = {}
@@ -243,6 +243,7 @@ show_as_columns = function(t, bgcolor, seen, column_order, skip_header)
    end
    output_line(out, table.concat(border_bot))
 
+   local t = t
    for k, v in pairs(t) do
       if type(k) ~= "number" then
          local out2 = show_as_list(t, bgcolor, seen, true)

@@ -69,7 +69,7 @@ local Output = record
 end
 
 local show: function(any, string, {any:boolean}, {string}):Output
-local show_as_columns: function({{string:any}}, string, {any:boolean}, {string}, boolean): Output
+local show_as_columns: function({{any:any}}, string, {any:boolean}, {string}, boolean): Output
 
 local function output_line(out: Output, line: string)
   table.insert(out, line)
@@ -85,8 +85,7 @@ local function escape_chars(c:string):string
    return "\\" .. string.byte(c)
 end
 
-local function show_as_list(t: any, color: string, seen: {any:boolean}, skip_array: boolean): Output
-  local t = t as table
+local function show_as_list(t: {any:any}, color: string, seen: {any:boolean}, skip_array: boolean): Output
   local tt: {Pair} = {}
   local width = 0
   local keys = {}
@@ -112,7 +111,7 @@ local function show_as_list(t: any, color: string, seen: {any:boolean}, skip_arr
      tt[i].v1 = k .. " " .. ("."):rep(width - strlen(k)) .. ":"
   end
 
-  return show_as_columns(tt, color, seen, nil, true)
+  return show_as_columns(tt as {{any:any}}, color, seen, nil, true)
 end
 
 local function show_primitive(t: any, color: string, seen: {any:boolean}): Output
@@ -145,7 +144,7 @@ local Row = record
    width: number
 end
 
-show_as_columns = function(t: {{string:any}}, bgcolor: string, seen: {any:boolean}, column_order: {string}, skip_header: boolean): Output
+show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean}, column_order: {string}, skip_header: boolean): Output
   local columns: {string:Row} = {}
   local row_heights: {number:number} = {}
 
@@ -163,6 +162,7 @@ show_as_columns = function(t: {{string:any}}, bgcolor: string, seen: {any:boolea
   for i, row in ipairs(t) do
     if type(row) == "table" then
       for k, v in pairs(row) do
+        local k = tostring(k)
         if (not column_set) or column_set[k] then
           if not columns[k] then
             columns[k] = {}
@@ -243,7 +243,8 @@ show_as_columns = function(t: {{string:any}}, bgcolor: string, seen: {any:boolea
   end
   output_line(out, table.concat(border_bot))
 
-  for k, v in pairs(t as {any:any}) do
+  local t = t as {any:any}
+  for k, v in pairs(t) do
     if type(k) ~= "number" then
       local out2 = show_as_list(t, bgcolor, seen, true)
       for _, line in ipairs(out2) do
@@ -264,9 +265,9 @@ show = function(t: any, color: string, seen: {any:boolean}, column_order: {strin
   seen[t] = true
 
   if type(t) == "table" then
-    local t = t as table
+    local t = t as {any:any}
     if #t > 0 and type(t[1]) == "table" then
-      return show_as_columns(t as {{string: any}}, color, seen, column_order)
+      return show_as_columns(t as {{any:any}}, color, seen, column_order)
     else
       return show_as_list(t, color, seen)
     end
