@@ -20,7 +20,10 @@ local draw = {
    ["X"] = "+",
 }
 
-local colors
+local colors = {
+   [1] = ansicolors.noReset("%{cyan}"),
+   [2] = ansicolors.noReset("%{white}"),
+}
 
 local function strlen(s)
    s = s:gsub("\27[^m]*m", "")
@@ -30,10 +33,6 @@ end
 local strsub = string.sub
 
 if (os.getenv("LANG") or ""):upper():match("UTF%-?8") then
-   colors = {
-      [1] = ansicolors.noReset("%{cyan}"),
-      [2] = ansicolors.noReset("%{white}"),
-   }
    draw = {
       ["NW"] = "┌",
       ["NE"] = "┐",
