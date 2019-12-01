@@ -20,7 +20,7 @@ local draw = {
    X = "+",
 }
 
-local colors: {string} = {}
+local colors: {string}
 
 local function strlen(s: string): number
    s = s:gsub("\27[^m]*m", "")
@@ -277,11 +277,11 @@ show = function(t: any, color: string, seen: {any:boolean}, column_order: {strin
 end
 
 function tabular.show(t: any, column_order: {string}, color: boolean): string
-  return table.concat(show(t, color and ansicolors.noReset("%{reset}"), {}, column_order), "\n")
+  return table.concat(show(t, color and colors and ansicolors.noReset("%{reset}"), {}, column_order), "\n")
 end
 
-if arg[0] == "tabular.tl" then
-   print(tabular.show(_G))
+if arg[0]:match("tabular.tl$") then
+   print(tabular.show(_G, nil, true))
    os.exit(0)
 end
 
