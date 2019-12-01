@@ -1,71 +1,71 @@
 local tabular = {}
 
 local AnsiColors = record
-   noReset: function(string):string
+  noReset: function(string):string
 end
 
 local ansicolors = require("ansicolors") as AnsiColors
 
 local draw = {
-   NW = "/",
-   NE = "\\",
-   SW = "\\",
-   SE = "/",
-   N = "+",
-   S = "+",
-   E = "+",
-   W = "+",
-   V = "|",
-   H = "-",
-   X = "+",
+  NW = "/",
+  NE = "\\",
+  SW = "\\",
+  SE = "/",
+  N = "+",
+  S = "+",
+  E = "+",
+  W = "+",
+  V = "|",
+  H = "-",
+  X = "+",
 }
 
 local colors: {string}
 
 local function strlen(s: string): number
-   s = s:gsub("\27[^m]*m", "")
-   return #s
+  s = s:gsub("\27[^m]*m", "")
+  return #s
 end
 
 local strsub = string.sub
 
 if (os.getenv("LANG") or ""):upper():match("UTF%-?8") then
-   colors = {
-      ansicolors.noReset("%{cyan}"),
-      ansicolors.noReset("%{white}"),
-   }
-   draw = {
-      NW = "┌",
-      NE = "┐",
-      SW = "└",
-      SE = "┘",
-      N = "┬",
-      S = "┴",
-      E = "┤",
-      W = "├",
-      V = "│",
-      H = "─",
-      X = "┼",
-   }
+  colors = {
+    ansicolors.noReset("%{cyan}"),
+    ansicolors.noReset("%{white}"),
+  }
+  draw = {
+    NW = "┌",
+    NE = "┐",
+    SW = "└",
+    SE = "┘",
+    N = "┬",
+    S = "┴",
+    E = "┤",
+    W = "├",
+    V = "│",
+    H = "─",
+    X = "┼",
+  }
 
-   strlen = function(s: string): number
-      s = s:gsub("\27[^m]*m", "")
-      return utf8.len(s) or #s
-   end
+  strlen = function(s: string): number
+    s = s:gsub("\27[^m]*m", "")
+    return utf8.len(s) or #s
+  end
 
-   strsub = function(s: string, i: number, j: number): string
-      local uj = utf8.offset(s, j + 1)
-      if uj then
-         uj = uj - 1
-      end
-      return s:sub(utf8.offset(s, i), uj)
-   end
+  strsub = function(s: string, i: number, j: number): string
+    local uj = utf8.offset(s, j + 1)
+    if uj then
+      uj = uj - 1
+    end
+    return s:sub(utf8.offset(s, i), uj)
+  end
 
 end
 
 local Output = record
-   {string}
-   width: number
+  {string}
+  width: number
 end
 
 local show: function(any, string, {any:boolean}, {string}):Output
@@ -77,12 +77,12 @@ local function output_line(out: Output, line: string)
 end
 
 local Pair = record
-   v1: string
-   v2: any
+  v1: string
+  v2: any
 end
 
 local function escape_chars(c:string):string
-   return "\\" .. string.byte(c)
+  return "\\" .. string.byte(c)
 end
 
 local function show_as_list(t: {any:any}, color: string, seen: {any:boolean}, skip_array: boolean): Output
@@ -100,15 +100,15 @@ local function show_as_list(t: {any:any}, color: string, seen: {any:boolean}, sk
 
   table.sort(tt, function(a: Pair, b: Pair): boolean
     if type(a.v1) == "number" and type(b.v1) == "number" then
-       return a.v1 < b.v1
+      return a.v1 < b.v1
     else
-       return tostring(a.v1) < tostring(b.v1)
+      return tostring(a.v1) < tostring(b.v1)
     end
   end)
 
   for i = 1, #tt do
-     local k = keys[tt[i].v1]
-     tt[i].v1 = k .. " " .. ("."):rep(width - strlen(k)) .. ":"
+    local k = keys[tt[i].v1]
+    tt[i].v1 = k .. " " .. ("."):rep(width - strlen(k)) .. ":"
   end
 
   return show_as_columns(tt as {{any:any}}, color, seen, nil, true)
@@ -133,15 +133,15 @@ local function show_primitive(t: any, color: string, seen: {any:boolean}): Outpu
       output_line(out, strsub(s, i, i+79))
     end
   else
-     output_line(out, s)
+    output_line(out, s)
   end
 
   return out
 end
 
 local Row = record
-   {Output}
-   width: number
+  {Output}
+  width: number
 end
 
 show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean}, column_order: {string}, skip_header: boolean): Output
@@ -178,15 +178,15 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
   end
 
   if not column_order then
-     column_names = {}
-     column_set = {}
-     for name, row in pairs(columns) do
-       if not column_set[name] then
-         table.insert(column_names, name)
-         column_set[name] = true
-       end
-     end
-     table.sort(column_names)
+    column_names = {}
+    column_set = {}
+    for name, row in pairs(columns) do
+      if not column_set[name] then
+        table.insert(column_names, name)
+        column_set[name] = true
+      end
+    end
+    table.sort(column_names)
   end
 
   local function output_cell(line: {string}, cname: string, text: string, color: string)
@@ -259,8 +259,8 @@ end
 
 show = function(t: any, color: string, seen: {any:boolean}, column_order: {string}): Output
   if type(t) == "table" and seen[t] then
-     local msg = "<see above>"
-     return { msg, width = strlen(msg) }
+    local msg = "<see above>"
+    return { msg, width = strlen(msg) }
   end
   seen[t] = true
 
@@ -281,8 +281,8 @@ function tabular.show(t: any, column_order: {string}, color: boolean): string
 end
 
 if arg[0]:match("tabular.tl$") then
-   print(tabular.show(_G, nil, true))
-   os.exit(0)
+  print(tabular.show(_G, nil, true))
+  os.exit(0)
 end
 
 return setmetatable( tabular, { __call = function(_, ...): string return tabular.show(...) end } )
