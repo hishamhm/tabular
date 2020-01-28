@@ -123,7 +123,7 @@ local function show_primitive(t, color, seen)
          ["\t"] = "\\t",
       })
    else
-      s = s:gsub("[\0-\31\127-\255]", escape_chars)
+      s = s:gsub("[%z-\31\127-\255]", escape_chars)
    end
 
    if strlen(s) > 80 then
@@ -279,7 +279,7 @@ function tabular.show(t, column_order, color)
    return table.concat(show(t, color and colors and ansicolors.noReset("%{reset}"), {}, column_order), "\n")
 end
 
-if arg[0]:match("tabular.tl$") then
+if arg and arg[0]:match("tabular%..*$") then
    print(tabular.show(_G, nil, true))
    os.exit(0)
 end
