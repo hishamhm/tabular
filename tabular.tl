@@ -1,10 +1,11 @@
 local tabular = {}
 
-local AnsiColors = record
+local record AnsiColors
   noReset: function(string):string
 end
 
-local ansicolors = require("ansicolors") as AnsiColors
+local _require = require
+local ansicolors = _require("ansicolors") as AnsiColors
 
 local draw = {
   NW = "/",
@@ -62,58 +63,55 @@ if (os.getenv("LANG") or ""):upper():match("UTF%-?8") then
 
 end
 
-local Output = record
+local record Output
   {string}
   width: number
 end
 
-local show: function(any, string, {any:boolean}, {string}):Output
-local show_as_columns: function({{any:any}}, string, {any:boolean}, {string}, boolean): Output
+local show: function(any, string, {any:boolean}, {any:number}, {string}):Output
+local show_as_columns: function({{any:any}}, string, {any:boolean}, {any:number}, {string}, boolean): Output
 
 local function output_line(out: Output, line: string)
   table.insert(out, line)
   out.width = math.max(out.width or 0, strlen(line))
 end
 
-local Pair = record
-  v1: string
-  v2: any
-end
-
 local function escape_chars(c:string):string
   return "\\" .. string.byte(c)
 end
 
-local function show_as_list(t: {any:any}, color: string, seen: {any:boolean}, skip_array: boolean): Output
+local type Pair = {string, any}
+
+local function show_as_list(t: {any:any}, color: string, seen: {any:boolean}, ids: {any:number}, skip_array: boolean): Output
   local tt: {Pair} = {}
   local width = 0
   local keys = {}
 
   for k, v in pairs(t) do
     if not skip_array or type(k) ~= "number" then
-      table.insert(tt, { v1 = k as string, v2 = v })
+      table.insert(tt, { k as string, v })
       keys[k] = tostring(k)
       width = math.max(width, strlen(keys[k]))
     end
   end
 
   table.sort(tt, function(a: Pair, b: Pair): boolean
-    if type(a.v1) == "number" and type(b.v1) == "number" then
-      return a.v1 < b.v1
+    if type(a[1]) == "number" and type(b[1]) == "number" then
+      return a[1] < b[1]
     else
-      return tostring(a.v1) < tostring(b.v1)
+      return tostring(a[1]) < tostring(b[1])
     end
   end)
 
   for i = 1, #tt do
-    local k = keys[tt[i].v1]
-    tt[i].v1 = k .. " " .. ("."):rep(width - strlen(k)) .. ":"
+    local k = keys[tt[i][1]]
+    tt[i][1] = k .. " " .. ("."):rep(width - strlen(k)) .. ":"
   end
 
-  return show_as_columns(tt as {{any:any}}, color, seen, nil, true)
+  return show_as_columns(tt as {{any:any}}, color, seen, ids, nil, true)
 end
 
-local function show_primitive(t: any, color: string, seen: {any:boolean}): Output
+local function show_primitive(t: any): Output
   local out = {}
   local s = tostring(t)
 
@@ -138,12 +136,12 @@ local function show_primitive(t: any, color: string, seen: {any:boolean}): Outpu
   return out
 end
 
-local Row = record
+local record Row
   {Output}
   width: number
 end
 
-show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean}, column_order: {string}, skip_header: boolean): Output
+show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean}, ids: {any:number}, column_order: {string}, skip_header: boolean): Output
   local columns: {string:Row} = {}
   local row_heights: {number:number} = {}
 
@@ -161,15 +159,15 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
   for i, row in ipairs(t) do
     if type(row) == "table" then
       for k, v in pairs(row) do
-        local k = tostring(k)
-        if (not column_set) or column_set[k] then
-          if not columns[k] then
-            columns[k] = {}
-            columns[k].width = strlen(k)
+        local sk = tostring(k)
+        if (not column_set) or column_set[sk] then
+          if not columns[sk] then
+            columns[sk] = {}
+            columns[sk].width = strlen(sk)
           end
-          local sv = show(v, bgcolor and colors[(i % #colors) + 1], seen)
-          columns[k][i] = sv
-          columns[k].width = math.max(columns[k].width, sv.width)
+          local sv = show(v, bgcolor and colors[(i % #colors) + 1], seen, ids)
+          columns[sk][i] = sv
+          columns[sk].width = math.max(columns[sk].width, sv.width)
           row_heights[i] = math.max(row_heights[i] or 0, #sv)
         end
       end
@@ -179,7 +177,7 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
   if not column_order then
     column_names = {}
     column_set = {}
-    for name, row in pairs(columns) do
+    for name, _row in pairs(columns) do
       if not column_set[name] then
         table.insert(column_names, name)
         column_set[name] = true
@@ -205,16 +203,19 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
 
   local out = {}
 
-  local border_top = {draw.NW}
-  local border_bot = {draw.SW}
+  local border_top = {}
+  local border_bot = {}
   for i, cname in ipairs(column_names) do
-    table.insert(border_top, draw.H:rep(columns[cname].width))
-    table.insert(border_bot, draw.H:rep(columns[cname].width))
+    local w = columns[cname].width
+    table.insert(border_top, draw.H:rep(w))
+    table.insert(border_bot, draw.H:rep(w))
     if i < #column_names then
       table.insert(border_top, draw.N)
       table.insert(border_bot, draw.S)
     end
   end
+  table.insert(border_top, 1, draw.NW)
+  table.insert(border_bot, 1, draw.SW)
   table.insert(border_top, draw.NE)
   table.insert(border_bot, draw.SE)
 
@@ -242,10 +243,10 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
   end
   output_line(out, table.concat(border_bot))
 
-  local t = t as {any:any}
-  for k, v in pairs(t) do
+  local mt = t as {any:any}
+  for k, _v in pairs(mt) do
     if type(k) ~= "number" then
-      local out2 = show_as_list(t, bgcolor, seen, true)
+      local out2 = show_as_list(mt, bgcolor, seen, ids, true)
       for _, line in ipairs(out2) do
         output_line(out, line)
       end
@@ -256,27 +257,44 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
   return out
 end
 
-show = function(t: any, color: string, seen: {any:boolean}, column_order: {string}): Output
+show = function(t: any, color: string, seen: {any:boolean}, ids: {any:number}, column_order: {string}): Output
   if type(t) == "table" and seen[t] then
-    local msg = "<see above>"
+    local msg = "<see " .. ids[t] .. ">"
     return { msg, width = strlen(msg) }
   end
   seen[t] = true
 
   if type(t) == "table" then
-    local t = t as {any:any}
-    if #t > 0 and type(t[1]) == "table" then
-      return show_as_columns(t as {{any:any}}, color, seen, column_order)
+    local tt = t as {any:any}
+    if #tt > 0 and type(tt[1]) == "table" then
+      return show_as_columns(tt as {{any:any}}, color, seen, ids, column_order)
     else
-      return show_as_list(t, color, seen)
+      return show_as_list(tt, color, seen, ids)
     end
   else
-    return show_primitive(t, color, seen)
+    return show_primitive(t)
   end
 end
 
+local function detect_cycles(t: any, n: number, seen: {any:number}): {any:number}, number
+  n = n or 0
+  seen = seen or {}
+  if type(t) == "table" then
+    if seen[t] then
+      return seen
+    end
+    n = n + 1
+    seen[t] = n
+    for _k, v in pairs(t as {any:any}) do
+      seen, n = detect_cycles(v, n, seen)
+    end
+  end
+  return seen, n
+end
+
 function tabular.show(t: any, column_order: {string}, color: boolean): string
-  return table.concat(show(t, color and colors and ansicolors.noReset("%{reset}"), {}, column_order), "\n")
+  local ids = detect_cycles(t)
+  return table.concat(show(t, color and colors and ansicolors.noReset("%{reset}"), {}, ids, column_order), "\n")
 end
 
 if arg and arg[0]:match("tabular%..*$") then
