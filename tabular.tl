@@ -26,7 +26,7 @@ local colors: {string} = {
   ansicolors.noReset("%{white}"),
 }
 
-local function strlen(s: string): number
+local function strlen(s: string): integer
   s = s:gsub("\27[^m]*m", "")
   return #s
 end
@@ -48,7 +48,7 @@ if (os.getenv("LANG") or ""):upper():match("UTF%-?8") then
     X = "┼",
   }
 
-  strlen = function(s: string): number
+  strlen = function(s: string): integer
     s = s:gsub("\27[^m]*m", "")
     return utf8.len(s) or #s
   end
@@ -236,7 +236,7 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
       local line = { draw.V }
       for _, cname in ipairs(column_names) do
         local row = columns[cname][i]
-        output_cell(line, cname, row and row[h] or "", bgcolor and colors[(i % #colors) + 1])
+        output_cell(line, cname, row and row[math.floor(h)] or "", bgcolor and colors[(i % #colors) + 1])
       end
       output_line(out, table.concat(line))
     end
@@ -266,7 +266,7 @@ show = function(t: any, color: string, seen: {any:boolean}, ids: {any:number}, c
 
   if type(t) == "table" then
     local tt = t as {any:any}
-    if #tt > 0 and type(tt[1]) == "table" then
+    if #(tt as {any}) > 0 and type(tt[1]) == "table" then
       return show_as_columns(tt as {{any:any}}, color, seen, ids, column_order)
     else
       return show_as_list(tt, color, seen, ids)
@@ -302,4 +302,4 @@ if arg and arg[0]:match("tabular%..*$") then
   os.exit(0)
 end
 
-return setmetatable( tabular, { __call = function(_, ...): string return tabular.show(...) end } )
+return setmetatable( tabular, { __call = function(_, ...:any): string return tabular.show(... as {string}) end } )
