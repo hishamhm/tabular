@@ -143,7 +143,7 @@ end
 
 show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean}, ids: {any:number}, column_order: {string}, skip_header: boolean): Output
   local columns: {string:Row} = {}
-  local row_heights: {number:number} = {}
+  local row_heights: {integer:integer} = {}
 
   local column_names: {string}
   local column_set: {string:boolean}
@@ -236,7 +236,7 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
       local line = { draw.V }
       for _, cname in ipairs(column_names) do
         local row = columns[cname][i]
-        output_cell(line, cname, row and row[math.floor(h)] or "", bgcolor and colors[(i % #colors) + 1])
+        output_cell(line, cname, row and row[h] or "", bgcolor and colors[(i % #colors) + 1])
       end
       output_line(out, table.concat(line))
     end
