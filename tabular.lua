@@ -236,7 +236,7 @@ show_as_columns = function(t, bgcolor, seen, ids, column_order, skip_header)
          local line = { draw.V }
          for _, cname in ipairs(column_names) do
             local row = columns[cname][i]
-            output_cell(line, cname, row and row[math.floor(h)] or "", bgcolor and colors[(i % #colors) + 1])
+            output_cell(line, cname, row and row[h] or "", bgcolor and colors[(i % #colors) + 1])
          end
          output_line(out, table.concat(line))
       end
