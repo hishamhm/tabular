@@ -1,6 +1,6 @@
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local math = _tl_compat and _tl_compat.math or math; local os = _tl_compat and _tl_compat.os or os; local pairs = _tl_compat and _tl_compat.pairs or pairs; local string = _tl_compat and _tl_compat.string or string; local table = _tl_compat and _tl_compat.table or table; local utf8 = _tl_compat and _tl_compat.utf8 or utf8; local tabular = {}
 
-local AnsiColors = {}
+
 
 
 
@@ -63,7 +63,7 @@ if (os.getenv("LANG") or ""):upper():match("UTF%-?8") then
 
 end
 
-local Output = {}
+
 
 
 
@@ -80,7 +80,7 @@ local function escape_chars(c)
    return "\\" .. string.byte(c)
 end
 
-local Pair = {}
+
 
 local function show_as_list(t, color, seen, ids, skip_array)
    local tt = {}
@@ -136,7 +136,7 @@ local function show_primitive(t)
    return out
 end
 
-local Row = {}
+
 
 
 
@@ -266,7 +266,7 @@ show = function(t, color, seen, ids, column_order)
 
    if type(t) == "table" then
       local tt = t
-      if #tt > 0 and type(tt[1]) == "table" then
+      if #(tt) > 0 and type(tt[1]) == "table" then
          return show_as_columns(tt, color, seen, ids, column_order)
       else
          return show_as_list(tt, color, seen, ids)
