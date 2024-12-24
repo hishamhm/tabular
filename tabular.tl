@@ -1,4 +1,8 @@
-local tabular = {}
+local record Tabular
+    show: function(t: any, column_order?: {string}, color?: boolean): string
+end
+
+local tabular: Tabular = {}
 
 local record AnsiColors
   noReset: function(string):string
@@ -50,15 +54,15 @@ if (os.getenv("LANG") or ""):upper():match("UTF%-?8") then
 
   strlen = function(s: string): integer
     s = s:gsub("\27[^m]*m", "")
-    return utf8.len(s) or #s
+    return utf8.len(s) as integer or #s
   end
 
   strsub = function(s: string, i: number, j: number): string
-    local uj = utf8.offset(s, j + 1)
+    local uj: number = utf8.offset(s, j + 1)
     if uj then
       uj = uj - 1
     end
-    return s:sub(utf8.offset(s, i), uj)
+    return s:sub(utf8.offset(s, i) as integer, uj as integer)
   end
 
 end
@@ -68,8 +72,8 @@ local record Output
   width: number
 end
 
-local show: function(any, string, {any:boolean}, {any:number}, {string}):Output
-local show_as_columns: function({{any:any}}, string, {any:boolean}, {any:number}, {string}, boolean): Output
+local show: function(any, string, {any:boolean}, {any:number}, ?{string}):Output
+local show_as_columns: function({{any:any}}, string, {any:boolean}, {any:number}, {string}, ?boolean): Output
 
 local function output_line(out: Output, line: string)
   table.insert(out, line)
@@ -82,7 +86,7 @@ end
 
 local type Pair = {string, any}
 
-local function show_as_list(t: {any:any}, color: string, seen: {any:boolean}, ids: {any:number}, skip_array: boolean): Output
+local function show_as_list(t: {any:any}, color: string, seen: {any:boolean}, ids: {any:number}, skip_array?: boolean): Output
   local tt: {Pair} = {}
   local width = 0
   local keys = {}
@@ -186,7 +190,7 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
     table.sort(column_names)
   end
 
-  local function output_cell(line: {string}, cname: string, text: string, color: string)
+  local function output_cell(line: {string}, cname: string, text: string, color?: string)
     local w = columns[cname].width
     text = text or ""
     if color then
@@ -194,7 +198,7 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
     elseif bgcolor then
       table.insert(line, bgcolor)
     end
-    table.insert(line, text .. (" "):rep(w - strlen(text)))
+    table.insert(line, text .. (" "):rep((w - strlen(text)) as integer))
     if color then
       table.insert(line, bgcolor)
     end
@@ -207,8 +211,8 @@ show_as_columns = function(t: {{any:any}}, bgcolor: string, seen: {any:boolean},
   local border_bot = {}
   for i, cname in ipairs(column_names) do
     local w = columns[cname].width
-    table.insert(border_top, draw.H:rep(w))
-    table.insert(border_bot, draw.H:rep(w))
+    table.insert(border_top, draw.H:rep(w as integer))
+    table.insert(border_bot, draw.H:rep(w as integer))
     if i < #column_names then
       table.insert(border_top, draw.N)
       table.insert(border_bot, draw.S)
@@ -276,7 +280,7 @@ show = function(t: any, color: string, seen: {any:boolean}, ids: {any:number}, c
   end
 end
 
-local function detect_cycles(t: any, n: number, seen: {any:number}): {any:number}, number
+local function detect_cycles(t: any, n?: number, seen?: {any:number}): {any:number}, number
   n = n or 0
   seen = seen or {}
   if type(t) == "table" then
@@ -292,7 +296,7 @@ local function detect_cycles(t: any, n: number, seen: {any:number}): {any:number
   return seen, n
 end
 
-function tabular.show(t: any, column_order: {string}, color: boolean): string
+function tabular.show(t: any, column_order?: {string}, color?: boolean): string
   local ids = detect_cycles(t)
   return table.concat(show(t, color and colors and ansicolors.noReset("%{reset}"), {}, ids, column_order), "\n")
 end
@@ -302,4 +306,8 @@ if arg and arg[0]:match("tabular%..*$") then
   os.exit(0)
 end
 
-return setmetatable( tabular, { __call = function(_, ...:any): string return tabular.show(... as {string}) end } )
+return setmetatable( tabular, { 
+    __call = function(_: Tabular, ...:any): string 
+        return tabular.show(... as {string}) 
+    end 
+} )
