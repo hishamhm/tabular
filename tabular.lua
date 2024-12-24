@@ -1,4 +1,8 @@
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local math = _tl_compat and _tl_compat.math or math; local os = _tl_compat and _tl_compat.os or os; local pairs = _tl_compat and _tl_compat.pairs or pairs; local string = _tl_compat and _tl_compat.string or string; local table = _tl_compat and _tl_compat.table or table; local utf8 = _tl_compat and _tl_compat.utf8 or utf8; local tabular = {}
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local math = _tl_compat and _tl_compat.math or math; local os = _tl_compat and _tl_compat.os or os; local pairs = _tl_compat and _tl_compat.pairs or pairs; local string = _tl_compat and _tl_compat.string or string; local table = _tl_compat and _tl_compat.table or table; local utf8 = _tl_compat and _tl_compat.utf8 or utf8
+
+
+
+local tabular = {}
 
 
 
@@ -194,7 +198,7 @@ show_as_columns = function(t, bgcolor, seen, ids, column_order, skip_header)
       elseif bgcolor then
          table.insert(line, bgcolor)
       end
-      table.insert(line, text .. (" "):rep(w - strlen(text)))
+      table.insert(line, text .. (" "):rep((w - strlen(text))))
       if color then
          table.insert(line, bgcolor)
       end
@@ -302,4 +306,8 @@ if arg and arg[0]:match("tabular%..*$") then
    os.exit(0)
 end
 
-return setmetatable(tabular, { __call = function(_, ...) return tabular.show(...) end })
+return setmetatable(tabular, {
+   __call = function(_, ...)
+      return tabular.show(...)
+   end,
+})
