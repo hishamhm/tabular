@@ -1,15 +1,10 @@
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local math = _tl_compat and _tl_compat.math or math; local os = _tl_compat and _tl_compat.os or os; local pairs = _tl_compat and _tl_compat.pairs or pairs; local string = _tl_compat and _tl_compat.string or string; local table = _tl_compat and _tl_compat.table or table; local utf8 = _tl_compat and _tl_compat.utf8 or utf8
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local math = _tl_compat and _tl_compat.math or math; local os = _tl_compat and _tl_compat.os or os; local pairs = _tl_compat and _tl_compat.pairs or pairs; local pcall = _tl_compat and _tl_compat.pcall or pcall; local string = _tl_compat and _tl_compat.string or string; local table = _tl_compat and _tl_compat.table or table; local utf8 = _tl_compat and _tl_compat.utf8 or utf8
 
 
 
 local tabular = {}
 
-
-
-
-
-local _require = require
-local ansicolors = _require("ansicolors")
+local ansicolors_ok, ansicolors = pcall(require, "ansicolors")
 
 local draw = {
    NW = "/",
@@ -26,8 +21,8 @@ local draw = {
 }
 
 local colors = {
-   ansicolors.noReset("%{cyan}"),
-   ansicolors.noReset("%{white}"),
+   ansicolors_ok and ansicolors.noReset("%{cyan}") or "",
+   ansicolors_ok and ansicolors.noReset("%{white}") or "",
 }
 
 local function strlen(s)
@@ -285,7 +280,7 @@ local function detect_cycles(t, n, seen)
    seen = seen or {}
    if type(t) == "table" then
       if seen[t] then
-         return seen
+         return seen, n
       end
       n = n + 1
       seen[t] = n
@@ -298,7 +293,7 @@ end
 
 function tabular.show(t, column_order, color)
    local ids = detect_cycles(t)
-   return table.concat(show(t, color and colors and ansicolors.noReset("%{reset}"), {}, ids, column_order), "\n")
+   return table.concat(show(t, color and colors and ansicolors_ok and ansicolors.noReset("%{reset}"), {}, ids, column_order), "\n")
 end
 
 if arg and arg[0]:match("tabular%..*$") then

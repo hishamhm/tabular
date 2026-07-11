@@ -4,12 +4,7 @@ end
 
 local tabular: Tabular = {}
 
-local record AnsiColors
-  noReset: function(string):string
-end
-
-local _require = require
-local ansicolors = _require("ansicolors") as AnsiColors
+local ansicolors_ok, ansicolors = pcall(require, "ansicolors")
 
 local draw = {
   NW = "/",
@@ -26,8 +21,8 @@ local draw = {
 }
 
 local colors: {string} = {
-  ansicolors.noReset("%{cyan}"),
-  ansicolors.noReset("%{white}"),
+  ansicolors_ok and ansicolors.noReset("%{cyan}") or "",
+  ansicolors_ok and ansicolors.noReset("%{white}") or "",
 }
 
 local function strlen(s: string): integer
@@ -285,7 +280,7 @@ local function detect_cycles(t: any, n?: number, seen?: {any:number}): {any:numb
   seen = seen or {}
   if type(t) == "table" then
     if seen[t] then
-      return seen
+      return seen, n
     end
     n = n + 1
     seen[t] = n
@@ -298,7 +293,7 @@ end
 
 function tabular.show(t: any, column_order?: {string}, color?: boolean): string
   local ids = detect_cycles(t)
-  return table.concat(show(t, color and colors and ansicolors.noReset("%{reset}"), {}, ids, column_order), "\n")
+  return table.concat(show(t, color and colors and ansicolors_ok and ansicolors.noReset("%{reset}"), {}, ids, column_order), "\n")
 end
 
 if arg and arg[0]:match("tabular%..*$") then
